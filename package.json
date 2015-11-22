@@ -1,0 +1,32 @@
+{
+  "name": "create-snippet",
+  "description": "Select text to create a snippet.",
+  "version": "0.0.1",
+  "publisher": "mousetraps",
+  "engines": {
+    "vscode": "^0.10.1"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:extension.sayHello"
+  ],
+  "main": "./extension",
+  "contributes": {
+    "commands": [
+      {
+        "command": "extension.sayHello",
+        "title": "Hello World"
+      }
+    ]
+  },
+  "devDependencies": {
+    "vscode": "0.10.x"
+  },
+  "dependencies": {
+    "comment-json": "^1.1.3",
+    "json-stable-stringify": "^1.0.0",
+    "node-uuid": "^1.4.7"
+  }
+}
