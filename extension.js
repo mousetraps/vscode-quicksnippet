@@ -5,11 +5,12 @@ var json = require('comment-json');
 var prependFile = require('prepend-file');
 
 var DEFAULT_SNIPPET_NAME = 'My Snippet Name: REPLACE OR IT WILL BE OVERWRITTEN';
+var SNIPPET_TEMPLATE_NAME = 'snippet-comment-template.txt';
 
 // this method is called when the extension is activated
 exports.activate = function activate(context) {
     console.log('Extension "create-snippet" is now active!');
-
+    SNIPPET_TEMPLATE_NAME = path.join(context.extensionPath, SNIPPET_TEMPLATE_NAME);
     var disposable = vscode.commands.registerCommand(
         'extension.createSnippet',
         function() {
@@ -111,7 +112,8 @@ function updateSnippetFile(snippetFilename, jsonData) {
             if (err) {
                 throw err;
             }
-            var snippetComment = fs.readFileSync('snippet-comment-template.txt', 'utf8').replace('$(languageId)', path.basename(snippetFilename));
+
+            var snippetComment = fs.readFileSync(SNIPPET_TEMPLATE_NAME, 'utf8').replace('$(languageId)', path.basename(snippetFilename));
             var current = fs.readFileSync(snippetFilename, 'utf8');
             if (!current.startsWith(snippetComment)) {
                 prependFile.sync(snippetFilename, snippetComment, {encoding: 'utf8'});
