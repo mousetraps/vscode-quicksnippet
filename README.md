@@ -1,13 +1,19 @@
-# README
-## This is the README for your extension "create-snippet" 
-You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
+# QuickSnippet for Visual Studio Code
+> Quickly create custom snippets for any language from selected text.
 
-* Split the editor (`Cmd+\` on OSX or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+CMD+V` on OSX or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (OSX) to see a list of Markdown snippets
+## Install the extension
 
-### For more information
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
+1. Open Visual Studio Code
+2. Press `Ctrl+P` to open the Quick Open dialog
+3. Type `ext install quicksnippet` to find the extension.
+4. Press `Enter` or click the cloud icon to install it
+5. Restart Visual Studio Code if prompted
+
+## Get started creating *so many* snippets!
+1. Select text from a file.
+2. Press `Ctrl+P` to open the Quick Open dialog
+3. Search for `Create Snippet`, and press enter. The selected text will be added as a snippet in the user snippets file for the current language.
+4. Edit the snippet properties (name, shortcut, description), and save your changes.
+5. Flip back to your original file, and start typing - your snippet should now appear in the completions list.
 
 ** Enjoy!**

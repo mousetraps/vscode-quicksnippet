@@ -4,6 +4,6 @@ x TODO create file if it doesn't already exist
 x TODO Add comments to generated json
 (B) TODO fix tab / spaces parsing code
 (B) TODO add unit tests
-(A) TODO cleanup
-(B) TODO readme
-(B) TODO publish extension
+(A) TODO clean up
+(A) TODO readme
+(A) TODO publish extension

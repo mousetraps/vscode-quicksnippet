@@ -4,14 +4,14 @@ var fs = require('fs');
 var json = require('comment-json');
 var prependFile = require('prepend-file');
 
-var DEFAULT_SNIPPET_NAME = 'REPLACE-WITH-YOUR-SNIPPET-NAME';
+var DEFAULT_SNIPPET_NAME = 'My Snippet Name: REPLACE OR IT WILL BE OVERWRITTEN';
 
 // this method is called when the extension is activated
 exports.activate = function activate(context) {
     console.log('Extension "create-snippet" is now active!');
 
     var disposable = vscode.commands.registerCommand(
-        'extension.sayHello',
+        'extension.createSnippet',
         function() {
             var editor = vscode.window.activeTextEditor;
             if (!editor) {
@@ -81,12 +81,10 @@ function getSnippetBody(editor) {
 
     var snippetParts = (selection + '$1').split(/\r?\n/);
 
-    var trimFirst = snippetParts[0].trimLeft();
+    snippetParts[0] = snippetParts[0].trimLeft();
 
     var trimLast = snippetParts[snippetParts.length - 1].trimLeft();
     var trimLastLength = snippetParts[snippetParts.length - 1].length - trimLast.length;
-
-    snippetParts[0] = trimFirst;
     snippetParts[snippetParts.length - 1] = trimLast;
 
     for (var i = 0; i < snippetParts.length; i++) {
