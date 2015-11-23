@@ -2,7 +2,7 @@ var vscode = require('vscode');
 var path = require('path');
 var fs = require('fs');
 var json = require('comment-json');
-var stringify = require('json-stable-stringify');
+var prependFile = require('prepend-file');
 
 var DEFAULT_SNIPPET_NAME = 'REPLACE-WITH-YOUR-SNIPPET-NAME';
 
@@ -21,24 +21,49 @@ exports.activate = function activate(context) {
 
             var snippetFilename = getSnippetFilename(editor);
 
-            fs.readFile(snippetFilename, 'utf8', function(e, data) {
-                var snippetBody = getSnippetBody(editor);
-
-                console.log(data);
-                var jsonData = JSON.parse(data, null, true);
-                jsonData[DEFAULT_SNIPPET_NAME] = {
-                    prefix: 'yourPrefixHere',
-                    body: snippetBody,
-                    description: 'Your snippet description here.'
-                };
-                console.log(jsonData);
-
-                updateSnippetFile(snippetFilename, jsonData);
+            fs.exists(snippetFilename, function(exists) {
+                if (!exists) {
+                    fs.writeFileSync(snippetFilename, '{ }', {encoding: 'utf8'});
+                }
+                createSnippet(snippetFilename, editor);
             });
         });
 
     context.subscriptions.push(disposable);
 };
+
+function createSnippet(snippetFilename, editor) {
+    fs.readFile(snippetFilename, 'utf8', function(e, data) {
+        console.log(data);
+        var jsonData = json.parse(data, null, false);
+        jsonData = addSelectedSnippet(jsonData, editor);
+        updateSnippetFile(snippetFilename, jsonData);
+    });
+}
+
+function addSelectedSnippet(jsonData, editor) {
+    var newJsonData = {};
+
+    var snippetBody = getSnippetBody(editor);
+
+    if (typeof (jsonData['//$']) !== 'undefined') {
+        // newJsonData['//$'] = jsonData['//$'];
+    }
+
+    newJsonData[DEFAULT_SNIPPET_NAME] = {
+        prefix: 'yourPrefixHere',
+        body: snippetBody,
+        description: 'Your snippet description here.'
+    };
+
+    for (var key in jsonData) {
+        if (key !== DEFAULT_SNIPPET_NAME && key !== '//$') {
+            newJsonData[key] = jsonData[key];
+        }
+    }
+    console.log(newJsonData);
+    return newJsonData;
+}
 
 function getSnippetFilename(editor) {
     var userDataPath = process.env.APPDATA ||
@@ -80,23 +105,32 @@ function getSnippetBody(editor) {
 }
 
 function updateSnippetFile(snippetFilename, jsonData) {
+    console.log(jsonData);
     fs.writeFile(
         snippetFilename,
-        stringify(jsonData, {space: '  ', cmp: snippetCompare}), {encoding: 'utf8'},
+        json.stringify(jsonData, null, ' '), {encoding: 'utf8'},
         function(err) {
-            vscode.workspace.openTextDocument(snippetFilename).then(function(document) {
-                vscode.window.showTextDocument(document, vscode.ViewColumn.Two);
+            if (err) {
+                throw err;
+            }
+            var snippetComment = fs.readFileSync('snippet-comment-template.txt', 'utf8').replace('$(languageId)', path.basename(snippetFilename));
+            var current = fs.readFileSync(snippetFilename, 'utf8');
+            if (!current.startsWith(snippetComment)) {
+                prependFile.sync(snippetFilename, snippetComment, {encoding: 'utf8'});
+            }
+            vscode.workspace.openTextDocument(snippetFilename).then(function(doc) {
+                vscode.window.showTextDocument(doc, vscode.ViewColumn.Two)
+                .then(selectDefaultSnippet);
             });
         }
     );
 }
 
-function snippetCompare(a, b) {
-    if (b.key === DEFAULT_SNIPPET_NAME) {
-        return 1;
-    } else if (a.key === DEFAULT_SNIPPET_NAME) {
-        return -1;
-    }
-    return a.key < b.key ? -1 : 1;
+function selectDefaultSnippet() {
+    var editor = vscode.window.activeTextEditor;
+    var index = editor.document.getText().indexOf(DEFAULT_SNIPPET_NAME);
+    editor.selection = new vscode.Selection(
+        editor.document.positionAt(index),
+        editor.document.positionAt(index + DEFAULT_SNIPPET_NAME.length)
+    );
 }
-

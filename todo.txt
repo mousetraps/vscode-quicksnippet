@@ -1,0 +1,9 @@
+x handle comments in json file
+(A) TODO figure out why parsing doesn't work sometimes
+x TODO create file if it doesn't already exist
+x TODO Add comments to generated json
+(B) TODO fix tab / spaces parsing code
+(B) TODO add unit tests
+(A) TODO cleanup
+(B) TODO readme
+(B) TODO publish extension
