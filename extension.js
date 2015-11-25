@@ -4,7 +4,6 @@ var fs = require('fs');
 var json = require('comment-json');
 var prependFile = require('prepend-file');
 
-var DEFAULT_SNIPPET_NAME = 'My Snippet Name: REPLACE OR IT WILL BE OVERWRITTEN';
 var SNIPPET_TEMPLATE_NAME = 'snippet-comment-template.txt';
 
 // this method is called when the extension is activated
@@ -26,6 +25,7 @@ exports.activate = function activate(context) {
                 if (!exists) {
                     fs.writeFileSync(snippetFilename, '{ }', {encoding: 'utf8'});
                 }
+                
                 createSnippet(snippetFilename, editor);
             });
         });
@@ -37,33 +37,39 @@ function createSnippet(snippetFilename, editor) {
     fs.readFile(snippetFilename, 'utf8', function(e, data) {
         console.log(data);
         var jsonData = (data ? json.parse(data, null, false) : {});
-        jsonData = addSelectedSnippet(jsonData, editor);
-        updateSnippetFile(snippetFilename, jsonData);
+        addSelectedSnippetAsync(jsonData, editor).then(function(result) {
+            jsonData = result;
+            updateSnippetFile(snippetFilename, jsonData);
+        });
     });
 }
 
-function addSelectedSnippet(jsonData, editor) {
+function addSelectedSnippetAsync(jsonData, editor) {
     var newJsonData = {};
 
     var snippetBody = getSnippetBody(editor);
 
-    if (typeof (jsonData['//$']) !== 'undefined') {
-        // newJsonData['//$'] = jsonData['//$'];
-    }
+    return vscode.window.showInputBox().then(function(value) {
+        var snippetName = value;
 
-    newJsonData[DEFAULT_SNIPPET_NAME] = {
-        prefix: 'yourPrefixHere',
-        body: snippetBody,
-        description: 'Your snippet description here.'
-    };
-
-    for (var key in jsonData) {
-        if (key !== DEFAULT_SNIPPET_NAME && key !== '//$') {
-            newJsonData[key] = jsonData[key];
+        if (typeof (jsonData['//$']) !== 'undefined') {
+            // newJsonData['//$'] = jsonData['//$'];
         }
-    }
-    console.log(newJsonData);
-    return newJsonData;
+    
+        newJsonData[snippetName] = {
+            prefix: 'yourPrefixHere',
+            body: snippetBody,
+            description: 'Your snippet description here.'
+        };
+    
+        for (var key in jsonData) {
+            if (key !== snippetName && key !== '//$') {
+                newJsonData[key] = jsonData[key];
+            }
+        }
+        console.log(newJsonData);
+        return newJsonData;
+    })
 }
 
 function getSnippetFilename(editor) {
@@ -112,29 +118,6 @@ function updateSnippetFile(snippetFilename, jsonData) {
             if (err) {
                 throw err;
             }
-
-            // don't see the need to write a comment and it's doing it for each snippet creation
-            // var snippetComment = fs.readFileSync(SNIPPET_TEMPLATE_NAME, 'utf8').replace('$(languageId)', path.basename(snippetFilename));
-            // var current = fs.readFileSync(snippetFilename, 'utf8');
-            // if (!current.startsWith(snippetComment)) {
-            //     prependFile.sync(snippetFilename, snippetComment, {encoding: 'utf8'});
-            // }
-            
-            //TODO: after we figure out how to prompt the user for the snippet name, 
-            //it won't be necessary to launch the snippet file anymore 
-            vscode.workspace.openTextDocument(snippetFilename).then(function(doc) {
-                vscode.window.showTextDocument(doc, vscode.ViewColumn.Two)
-                .then(selectDefaultSnippet);
-            });
         }
-    );
-}
-
-function selectDefaultSnippet() {
-    var editor = vscode.window.activeTextEditor;
-    var index = editor.document.getText().indexOf(DEFAULT_SNIPPET_NAME);
-    editor.selection = new vscode.Selection(
-        editor.document.positionAt(index),
-        editor.document.positionAt(index + DEFAULT_SNIPPET_NAME.length)
     );
 }
