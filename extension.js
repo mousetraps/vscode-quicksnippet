@@ -49,7 +49,7 @@ function addSelectedSnippetAsync(jsonData, editor) {
 
     var snippetBody = getSnippetBody(editor);
 
-    return vscode.window.showInputBox().then(function(value) {
+    return vscode.window.showInputBox({prompt:'Enter a name for your snippet'}).then(function(value) {
         var snippetName = value;
 
         if (typeof (jsonData['//$']) !== 'undefined') {
