@@ -36,7 +36,7 @@ exports.activate = function activate(context) {
 function createSnippet(snippetFilename, editor) {
     fs.readFile(snippetFilename, 'utf8', function(e, data) {
         console.log(data);
-        var jsonData = json.parse(data, null, false);
+        var jsonData = (data ? json.parse(data, null, false) : {});
         jsonData = addSelectedSnippet(jsonData, editor);
         updateSnippetFile(snippetFilename, jsonData);
     });
@@ -113,11 +113,15 @@ function updateSnippetFile(snippetFilename, jsonData) {
                 throw err;
             }
 
-            var snippetComment = fs.readFileSync(SNIPPET_TEMPLATE_NAME, 'utf8').replace('$(languageId)', path.basename(snippetFilename));
-            var current = fs.readFileSync(snippetFilename, 'utf8');
-            if (!current.startsWith(snippetComment)) {
-                prependFile.sync(snippetFilename, snippetComment, {encoding: 'utf8'});
-            }
+            // don't see the need to write a comment and it's doing it for each snippet creation
+            // var snippetComment = fs.readFileSync(SNIPPET_TEMPLATE_NAME, 'utf8').replace('$(languageId)', path.basename(snippetFilename));
+            // var current = fs.readFileSync(snippetFilename, 'utf8');
+            // if (!current.startsWith(snippetComment)) {
+            //     prependFile.sync(snippetFilename, snippetComment, {encoding: 'utf8'});
+            // }
+            
+            //TODO: after we figure out how to prompt the user for the snippet name, 
+            //it won't be necessary to launch the snippet file anymore 
             vscode.workspace.openTextDocument(snippetFilename).then(function(doc) {
                 vscode.window.showTextDocument(doc, vscode.ViewColumn.Two)
                 .then(selectDefaultSnippet);
